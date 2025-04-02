@@ -17,7 +17,7 @@
   <div class="page-content" id="content" style="background: #87CEEB">
     <!-- header -->
     <div class="d-flex justify-content-between py-4 px-2 " style="background-color: oklch(0.391 0.09 240.876);">
-      <h1 style="color:#ffffff">DASHBOARD</h1>
+      <h1 style="color:#ffffff">ADMIN</h1>
       <form action="/logout?_method=DELETE" method="POST">
         <center><button type="submit" class="btn logout" style="background-color: #ffffff;" ><p class="text-black">Log Out</p></button></center>
       </form>
@@ -27,27 +27,19 @@
     <div class="flex Opt_Bx justify-content-center">
         <!-- 1st Row -->
         <div class="row m-4" >
-            <div class="col-6 options">
-                <a href="/billing" class="nav-link text-white font-italic">
-                    <h1><i class="rupee sign icon"></i>Bill</h1>
+            <div class="col-4 options">
+                <a href="/addSupplierAdmin" class="nav-link text-white font-italic">
+                    <h1><i class="rupee sign icon"></i>Manage Supplier</h1>
                 </a>
             </div>
-            <div class="col-6 options">
-                <a href="/orders" class="nav-link text-white font-italic">
-                    <h1><i class="eye icon"></i>View Orders</h1>
+            <div class="col-4 options">
+                <a href="/addSupplierBook" class="nav-link text-white font-italic">
+                    <h1><i class="eye icon"></i>Add Books</h1>
                 </a>
             </div>
-        </div>
-        <!-- 2nd Row -->
-        <div class="row m-4">
-            <div class="col-6 options">
-                <a href="/inventory" class="nav-link text-white font-italic">
-                    <h1><i class="tags icon"></i>View Inventory</h1>
-                </a>
-            </div>
-            <div class="col-6 options">
-                <a href="/purchaseBook" class="nav-link text-white font-italic">
-                    <h1><i class="plus circle icon"></i>Purchase & History</h1>
+            <div class="col-4 options">
+                <a href="/adminOrderHistory" class="nav-link text-white font-italic">
+                    <h1><i class="eye icon"></i>Track History</h1>
                 </a>
             </div>
         </div>

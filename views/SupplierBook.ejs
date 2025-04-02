@@ -17,30 +17,39 @@
 <div class="page-content" id="content" style="background: #87CEEB">
     <!-- header -->
     <div class="d-flex justify-content-between py-4 px-2 " style="background-color: oklch(0.391 0.09 240.876);">
-      <h1 style="color:#ffffff">MANAGE SUPPLIER</h1>
+      <h1 style="color:#ffffff">MANAGE SUPPLIER Books</h1>
       <form action="/logout?_method=DELETE" method="POST">
         <center><button type="submit" class="btn logout" style="background-color: #ffffff;" ><p class="text-black">Log Out</p></button></center>
       </form>
     </div>
     <!-- Table for Supplier -->
      <div class="container mt-3 purchase">
-            <form action="/addSupplierAdmin" method="POST">
+            <form action="/addSupplierBook" method="POST">
                 <div class="mb-3">
-                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter Supplier name" required>
+                    <label for="supplier">Select Supplier:</label>
+                    <select id="supplier" name="Sname" class="form-control" required>
+                        <option value="">-- Select Supplier --</option>
+                        <% SupplierName.forEach(supplier => { %>
+                            <option value="<%= supplier.Supplier_Name %>"><%= supplier.Supplier_Name %></option>
+                        <% }) %>
+                    </select>
                 </div>
                 <div class="mb-3">
-                    <input type="text" id="city" name="city" class="form-control" placeholder="Enter City" required>
+                    <input type="text" id="name" name="Bname" class="form-control" placeholder="Enter Book Name" required>
                 </div>
                 <div class="mb-3">
-                    <input type="text" id="number" name="number" class="form-control" placeholder="Enter Contact number" required>
+                    <input type="text" id="city" name="genre" class="form-control" placeholder="Enter Book Genre" required>
+                </div>
+                <div class="mb-3">
+                    <input type="text" id="number" name="price" class="form-control" placeholder="Enter Book Price" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Add Supplier</button>
             </form>
         </div>
     <div>
-        <% if(supplier.length == 0){%>
+        <% if(SupplierBook.length == 0){%>
             <div class="empty-message d-flex justify-content-between">
-                <h2>No Suppliers yet☹️!</h2>
+                <h2>No Books yet☹️!</h2>
                 <!-- <a href="/purchaseBook">
                   <center>
                     <button type="button" class="btn mx-2" style="background-color: #a3eb87;">
@@ -55,17 +64,21 @@
                       <tr>
                         <th>Supplier ID</th>
                         <th>Supplier Name</th>
-                        <th>City</th>
-                        <th>Contact</th>
+                        <th>Book ID</th>
+                        <th>Book Name</th>
+                        <th>Book Genre</th>
+                        <th>Book Price</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <% supplier.forEach(function(s) { %>
+                      <% SupplierBook.forEach(function(s) { %>
                         <tr>
                           <td><%= s.SupplierID %></td>
                           <td><%= s.Supplier_Name %></td>
-                          <td><%= s.City %></td>
-                          <td><%= s.Contact_No %></td>
+                          <td><%= s.BookID %></td>
+                          <td><%= s.Book_Name %></td>
+                          <td><%= s.Book_Genre %></td>
+                          <td><%= s.Price %></td>
                         </tr>
                       <% }); %>
                     </tbody>

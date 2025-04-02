@@ -53,6 +53,7 @@ CREATE TABLE Transactions (
 
 CREATE TABLE SupplierBooks (
     `SupplierID` VARCHAR(25),
+    `Supplier_Name` VARCHAR (100) NOT NULL,
     `BookID` VARCHAR (25) NOT NULL,
     `Book_Name` VARCHAR (100) NOT NULL,
     `Book_Genre` VARCHAR (50) NOT NULL,
@@ -88,21 +89,21 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE TRIGGER before_insert_books
-BEFORE INSERT ON Books
+BEFORE INSERT ON SupplierBooks
 FOR EACH ROW
 BEGIN
-    DECLARE unique_supplier_id VARCHAR(25);
+    DECLARE unique_book_id VARCHAR(25);
 
     -- Generate a random SupplierID
-    SET unique_supplier_id = CONCAT('BKI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
+    SET unique_book_id = CONCAT('BKI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
 
     -- Check if the generated SupplierID already exists
-    WHILE EXISTS (SELECT 1 FROM Books WHERE BookID = unique_supplier_id) DO
+    WHILE EXISTS (SELECT 1 FROM SupplierBooks WHERE BookID = unique_book_id) DO
         -- Generate a new SupplierID if it already exists
-        SET unique_supplier_id = CONCAT('BKI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
+        SET unique_book_id = CONCAT('BKI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
     END WHILE;
 
-    SET NEW.BookID = unique_supplier_id;
+    SET NEW.BookID = unique_book_id;
 END $$
 
 DELIMITER ;
@@ -117,7 +118,7 @@ BEGIN
     DECLARE unique_supplier_id VARCHAR(25);
 
     -- Generate a random SupplierID
-    SET unique_supplier_id = CONCAT('SUP', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
+    SET unique_supplier_id = CONCAT('ROI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
 
     -- Check if the generated SupplierID already exists
     WHILE EXISTS (SELECT 1 FROM Retail_Orders WHERE OrderID = unique_supplier_id) DO
@@ -161,5 +162,8 @@ INSERT INTO `Supplier` (`Supplier_Name`,`Contact_No`,`City`) VALUES
     ('Novel Network Suppliers','9332101234','Jammu');
 
 
-INSERT INTO `SupplierBooks` VALUES
-    ('SUP001928631','BKI312456781','Rich Dad Poor Dad','Finance',500);
+INSERT INTO `SupplierBooks`(`SupplierID`,`Supplier_Name`,`Book_Name`,`Book_Genre`,`Price`) VALUES
+    ('SUP113600282','Novel Network Suppliers','Rich Dad Poor Dad','Finance',500),
+    ('SUP194221958','PageTurner Distributors.','Alchemist','Dream',300),
+    ('SUP232752216','Jayesh Enterprises','Pretty Girl','Dream',1000)
+    ;

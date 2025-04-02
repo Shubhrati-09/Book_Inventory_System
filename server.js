@@ -110,7 +110,7 @@ app.delete('/logout', (req, res) => {
 });
 
 //View Books in Stock
-app.get('/inventory', (req, res) => {
+app.get('/inventory',checkAuthenticated, (req, res) => {
     const query = 'SELECT * FROM Books';  // Query to fetch all books from the Books table
   
     mysqlConnection.query(query, (err, results) => {
@@ -124,7 +124,7 @@ app.get('/inventory', (req, res) => {
     });
 });
 
-app.get('/purchaseBook', (req, res) => {
+app.get('/purchaseBook',checkAuthenticated, (req, res) => {
     const query = "SELECT * FROM Purchased_Stock";
     mysqlConnection.query(query, (err, table) => {
         if (err) {
@@ -198,7 +198,7 @@ app.get('/purchaseBook', (req, res) => {
 // });
 
 
-app.post('/purchaseBook', (req, res) => {
+app.post('/purchaseBook',checkAuthenticated, (req, res) => {
   const name = req.body.name;
   const quantity = parseInt(req.body.quantity);
 
@@ -265,4 +265,91 @@ app.post('/purchaseBook', (req, res) => {
           });
       }
   });
+});
+
+
+
+
+// ---------------Admin_Handling---------------
+
+app.get('/adminDashboard',(req,res) => {
+    res.render('adminDashboard.ejs');
+});
+
+
+app.get('/addSupplierAdmin',(req,res)=>{
+  const query="SELECT * FROM Supplier";
+  mysqlConnection.query(query,(err,table)=>{
+    if(err){
+      console.log("error fetching supplier table",err.message);
+      return res.status(500).send("error fetching supplier details");
+    }
+    res.render('adminSupplier.ejs',{supplier:table});
+  });
+
+});
+
+app.post('/addSupplierAdmin',checkAuthenticated,(req,res) => {
+  const {name,city,number} = req.body;
+  console.log(name, city,number);
+  const query = "INSERT INTO Supplier (Supplier_Name,Contact_No,City) VALUES(?,?,?)";
+  mysqlConnection.query(query,[name,number,city],(err,Detail) =>{
+    if(err){
+      console.log("error fetching supplier table",err.message);
+      return res.status(500).send("error fetching supplier details");
+    }
+
+    res.redirect('/addSupplierAdmin');
+  })
+})
+
+
+app.get('/addSupplierBook',(req,res) => {
+  const query = "SELECT * FROM SupplierBooks";
+  const supplier = "SELECT Supplier_Name FROM Supplier";
+  mysqlConnection.query(query,(err,result) => {
+    if(err){
+      console.log("error fetching Supplier Book Table",err.message);
+      return res.status(500).send("error fetching Supplier Book Table");
+    }
+    mysqlConnection.query(supplier,(err,supplierN) =>{
+      if(err){
+        console.log("error fetching Supplier Name",err.message);
+        return res.status(500).send("error fetching Supplier Name");
+      }
+      res.render('SupplierBook.ejs',{SupplierBook : result , SupplierName : supplierN} );
+    })
+  });
+});
+
+app.post('/addSupplierBook',(req,res) => {
+  const {Sname,Bname,genre,price} = req.body;
+  //Fetching SupplierID FROM SupplierBooks table
+  let SupplierID;
+  const query1 = "SELECT SupplierID FROM Supplier WHERE Supplier_Name = ?";
+  mysqlConnection.query(query1,[Sname],(err,result) =>{
+    if(err){
+      console.log("error fetching Supplier ID",err.message);
+      return res.status(500).send("error fetching Supplier ID");
+    }
+    console.log(result);
+    SupplierID = result[0].SupplierID;
+    console.log("SuppleirID -> ",SupplierID);
+
+    const query2 = "INSERT INTO SupplierBooks (SupplierID,Supplier_Name,Book_Name,Book_Genre,Price) VALUES(?,?,?,?,?)";
+    mysqlConnection.query(query2,[SupplierID,Sname,Bname,genre,price],(err) =>{
+      if(err){
+        console.log("error Inserting into SupplierBooks",err.message);
+        return res.status(500).send("error Inserting into SupplierBooks");
+      }
+      console.log("Inserting into SupplierBooks Done!");
+    });
+  
+    res.redirect('/addSupplierBook');
+  });
+  
+
+  //Inserting Bok into SupplierBooks
+
+
 });
