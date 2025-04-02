@@ -19,6 +19,13 @@
         <div class="d-flex justify-content-between py-4 px-2 " style="background-color: oklch(0.391 0.09 240.876);">
             <h1 style="color:#ffffff">PURCHASE BOOKS</h1>
             <div class="d-flex">
+              <a href="/inventory">
+                <center>
+                  <button type="button" class="btn mx-2" style="background-color: #ffffff;">
+                    <p class="text-black">Inventory</p>
+                  </button>
+                </center>
+              </a>
               <a href="/">
                 <center>
                   <button type="button" class="btn mx-2" style="background-color: #ffffff;">
@@ -32,5 +39,58 @@
             </div>
           </div>
       
+        <!-- form for Purchasing New Item -->
+        <div class="container mt-3 purchase">
+            <form action="/purchaseBook" method="POST">
+                <div class="mb-3">
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter Book name" required>
+                </div>
+                <div class="mb-3">
+                    <input type="number" id="quantity" name="quantity" class="form-control" min="1" placeholder="Enter quantity" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Purchase</button>
+            </form>
+        </div>
+
+        <!-- Table To show Orders -->
+        <div>
+            <% if (PStocks.length === 0) { %>
+                <div class="empty-message d-flex justify-content-between">
+                  <h2>Nothing in Purchase ☹️!</h2>
+                  <!-- <a href="/purchaseBook">
+                    <center>
+                      <button type="button" class="btn mx-2" style="background-color: #a3eb87;">
+                        <p class="text-black fs-4">Purchase Book</p>
+                      </button>
+                    </center>
+                  </a> -->
+                </div>
+              <% } else { %>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Book ID</th>
+                      <th>Supplier ID</th>
+                      <th>Book Name</th>
+                      <th>Quantity</th>
+                      <th>Total Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% PStocks.forEach(function(book) { %>
+                      <tr>
+                        <td><%= book.OrderID %></td>
+                        <td><%= book.BookID %></td>
+                        <td><%= book.SupplierID %></td>
+                        <td><%= book.Book_Name %></td>
+                        <td><%= book.Quantity %></td>
+                        <td><%= book.TotalAmount %></td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              <% } %>
+        </div>
     </div>
   </body>

@@ -173,3 +173,8 @@ tr:nth-child(even) {
 tr:hover {
     background-color: #f1f1f1;
 }
+
+
+.purchase{
+    background-color: #2e5767;
+}
