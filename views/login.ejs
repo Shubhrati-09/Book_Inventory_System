@@ -12,12 +12,12 @@
     <title>Login</title>
   </head>
   <body style="background: linear-gradient(to bottom, #4d88d6 0%, #2e578e 100%);">
-    
+
+
     <br>
     <br>
     <br>
-    <br>
-    <div class="ui raised very padded text container segment"">
+    <div class="ui raised very padded text container segment mt-5">
       
       <h1 class="fs-1 text-white" style="background: linear-gradient(to right,  #4d88d6 0%, #2e578e 100%);"><center><shop-name></center></h1>  
       
@@ -48,15 +48,17 @@
                 <input placeholder="Your password" type="password" class="form-control" id="password" name="password" required>
               </div>
               </div>
-            
-            <br>
-            <button type="submit" class="ui fluid large teal submit button" style="background: linear-gradient(to right,  #4d88d6 0%, #2e578e 100%);">Login</button>
+              
+              <br>
+              <button type="submit" class="ui fluid large teal submit button" formaction="/loginAdmin" style="background: linear-gradient(to right,  #4d88d6 0%, #2e578e 100%);">Login As Admin</button>
+              <br>
+              <button type="submit" class="ui fluid large teal submit button" formaction="/login" style="background: linear-gradient(to right,  #4d88d6 0%, #2e578e 100%);">Login As Owner</button>
         </form>
       </div>
     </div>
-  </div>
-        
-    </div>
+
+    
+
     <script>
         var alertList = document.querySelectorAll('.alert')
         alertList.forEach(function (alert) {

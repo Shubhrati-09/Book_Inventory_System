@@ -47,13 +47,25 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride('_method'));
 
-// Store user credentials from .env
-const users = [{
-  id: Date.now().toString(),
-  name: "Owner",
-  email: process.env.login_id,
-  password: process.env.login_password // Ensure this is a **hashed** password in .env
-}];
+
+
+//--------------USER- ADMIN AND OWNER--------------
+const users = [
+  {
+    id: Date.now().toString(),
+    name: "Owner",
+    email: process.env.login_id,
+    password: process.env.login_password 
+  },
+  {
+    id: (Date.now() + 1).toString(),
+    name: "Admin",
+    email: process.env.admin_login_id, 
+    password: process.env.admin_login_password 
+  }
+];
+//-------------------------------------------------
+
 
 // Initialize Passport
 initializePassport(
@@ -62,41 +74,64 @@ initializePassport(
   id => users.find(user => user.id === id)
 );
 
-// Routes
-app.get('/', checkAuthenticated, (req, res) => {
-  res.render('index.ejs');
-});
 
-app.get('/login', checkNotAuthenticated, (req, res) => {
-  res.render('login.ejs');
-});
-
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-  }))
-
-// Middleware to check authentication
+//--------------------------MIDDLEWARE FUNCTIONS-----------------------------
+// Middleware to check is user is Onwer
 function checkAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && req.user.email === process.env.login_id) {
     return next();
   }
+
   res.redirect('/login');
 }
 
 function checkNotAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return res.redirect('/');
+  if (req.isAuthenticated() && req.user.email === process.env.login_id) {
+    return res.redirect('/'); // Redirect Owner to home
   }
   next();
 }
+
+
+// Middleware to check if user is Admin
+function checkAuthenticatedAdmin(req, res, next) {
+  if (req.isAuthenticated() && req.user.email === process.env.admin_login_id) {
+    return next();
+  }
+  res.redirect('/login'); // Redirect to login if not admin
+}
+
+function checkNotAuthenticatedAdmin(req, res, next) {
+  if (req.isAuthenticated() && req.user.email === process.env.admin_login_id) {
+    return res.redirect('/adminDashboard'); // Redirect Admin to adminDashboard
+  }
+  next();
+}
+//----------------------------------------------------------------------------
+
+
+
 
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
+
+// Routes
+app.get('/', checkAuthenticated, (req, res) => {
+  res.render('index.ejs');
+});
+
+app.get('/login', [checkNotAuthenticated, checkNotAuthenticatedAdmin], (req, res) => {
+  res.render('login.ejs');
+});
+
+app.post('/login', [checkNotAuthenticated, checkNotAuthenticatedAdmin], passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true
+  }))
 
 // Logout Route
 app.delete('/logout', (req, res) => {
@@ -135,149 +170,103 @@ app.get('/purchaseBook',checkAuthenticated, (req, res) => {
     });
 });
 
-// app.post('/purchaseBook',(req,res) => {
-//     //Step1-> find the book name in Supplier table
-//     const name = req.body.name;
-//     const quantity = req.body.quantity;
-//     const query="SELECT * FROM SupplierBooks  WHERE Book_Name = ?";
-//     //Step2-> if book found, then send the data from that
+app.post('/purchaseBook',(req,res) => {
+    //Step1-> find the book name in Supplier table
+    const name = req.body.name;
+    const quantity = req.body.quantity;
+    const query="SELECT * FROM SupplierBooks  WHERE Book_Name = ?";
+    //Step2-> if book found, then send the data from that
 
-//     mysqlConnection.query(query,[name],(err,SupplierDetails) => {
-//         if (err) {
-//             console.error('Error fetching books:', err.message);
-//             return res.status(500).send('Error fetching Book Details From Supplier Side');
-//         } 
+    mysqlConnection.query(query,[name],(err,SupplierDetails) => {
+        if (err) {
+            console.error('Error fetching books:', err.message);
+            return res.status(500).send('Error fetching Book Details From Supplier Side');
+        } 
 
-//         if(SupplierDetails.length === 0){
-//           return res.redirect(`/purchaseBook?message=${encodeURIComponent("Book is not Available")}`);
-//         }
-        
-//         //if found, check if this book exists in Books table
-//         const SupplierID = SupplierDetails[0].SupplierID;
-//         const genre = SupplierDetails[0].Book_Genre;
-//         const BookID = SupplierDetails[0].BookID;
-//         const Price = SupplierDetails[0].Price;
-//         const totalAmount = Price * parseInt(quantity);
-
-//         const query1 = "SELECT * FROM Books WHERE Book_Name = ?";
-//         mysqlConnection.query(query1,[name],(err,bookDetail) =>{
-//             if(bookDetail.length === 0){
-//                 //means book not in Our store, so adding
-//                 // const Total_Amt = Price*quantity;
-//                 const insertQuery = "INSERT INTO Books (BookID, Book_Name, Book_Genre, Quantity,Price,SupplierID) VALUES (?, ?, ?, ?, ?, ?)";
-//                 mysqlConnection.query(insertQuery,[BookID,name,genre,quantity,Price,SupplierID],(err) =>{
-//                     if(err){
-//                         console.log("Error in Inserting New Book into Books Table ",err.message);
-//                         return res.status(500).send('Error Inserting Book Details To Books Table');
-//                     }
-//                 });
-//             }
-//             else{
-//                 const newQuantity = bookDetail[0].quantity + parseInt(quantity);
-//                 const updateQuery = "UPDATE Books SET Quantity = ? WHERE Book_Name = ?";
-//                 mysqlConnection.query(updateQuery,[newQuantity,name],(err) => {
-//                     if(err){
-//                         console.log("Error Updating Book in Books ",err.message);
-//                     }
-//                     // return res.redirect('/purchaseBook');
-//                 });
-//             }
-//         });
-
-//         //inserting this order into Purchase_Stocks Table
-//         const AddOrder = "INSERT INTO Purchased_Stock(BookID,Book_Name,Quantity,TotalAmount,SupplierID) VALUES(?, ?, ?, ?, ?)";
-//         mysqlConnection.query(AddOrder,[BookID,name,quantity,totalAmount,SupplierID],(err) => {
-//             if(err){
-//                 console.log("Error Adding Order ",err);
-//                 return res.status(500).send('Error Inserting Book Details To Books Table');
-//             }
-//         });
-//         return res.redirect('/purchaseBook');
-//     });
-//     //Step3-> if not found, alert that book not in stock
-// });
-
-
-app.post('/purchaseBook',checkAuthenticated, (req, res) => {
-  const name = req.body.name;
-  const quantity = parseInt(req.body.quantity);
-
-  // Step 1: Find the book in SupplierBooks
-  const query = "SELECT * FROM SupplierBooks WHERE Book_Name = ?";
-  mysqlConnection.query(query, [name], (err, SupplierDetails) => {
-      if (err) {
-          console.error("Error fetching books:", err.message);
-          return res.status(500).send("Error fetching Book Details From Supplier Side");
-      }
-
-      if (SupplierDetails.length === 0) {
+        if(SupplierDetails.length === 0){
           return res.redirect(`/purchaseBook?message=${encodeURIComponent("Book is not Available")}`);
-      }
+        }
+        
+        //if found, check if this book exists in Books table
+        const SupplierID = SupplierDetails[0].SupplierID;
+        const genre = SupplierDetails[0].Book_Genre;
+        const BookID = SupplierDetails[0].BookID;
+        const Price = SupplierDetails[0].Price;
+        const totalAmount = Price * parseInt(quantity);
 
-      // Book found in SupplierBooks, extract details
-      const { SupplierID, Book_Genre: genre, BookID, Price } = SupplierDetails[0];
-      const totalAmount = Price * quantity;
+        const query1 = "SELECT * FROM Books WHERE Book_Name = ?";
+        mysqlConnection.query(query1,[name],(err,bookDetail) =>{
+            if(bookDetail.length === 0){
+                //means book not in Our store, so adding
+                // const Total_Amt = Price*quantity;
+                const insertQuery = "INSERT INTO Books (BookID, Book_Name, Book_Genre, Quantity,Price,SupplierID) VALUES (?, ?, ?, ?, ?, ?)";
+                mysqlConnection.query(insertQuery,[BookID,name,genre,quantity,Price,SupplierID],(err) =>{
+                    if(err){
+                        console.log("Error in Inserting New Book into Books Table ",err.message);
+                        return res.status(500).send('Error Inserting Book Details To Books Table');
+                    }
+                });
+            }
+            else{
+                const newQuantity = bookDetail[0].quantity + parseInt(quantity);
+                const updateQuery = "UPDATE Books SET Quantity = ? WHERE Book_Name = ?";
+                mysqlConnection.query(updateQuery,[newQuantity,name],(err) => {
+                    if(err){
+                        console.log("Error Updating Book in Books ",err.message);
+                    }
+                    // return res.redirect('/purchaseBook');
+                });
+            }
+        });
 
-      // Step 2: Check if the book exists in the Books table
-      const query1 = "SELECT * FROM Books WHERE Book_Name = ?";
-      mysqlConnection.query(query1, [name], (err, bookDetail) => {
-          if (err) {
-              console.error("Error fetching Books table:", err.message);
-              return res.status(500).send("Error fetching Books Table");
-          }
-
-          if (bookDetail.length === 0) {
-              // Book is not in store, insert it
-              const insertQuery = "INSERT INTO Books (BookID, Book_Name, Book_Genre, Quantity, Price, SupplierID) VALUES (?, ?, ?, ?, ?, ?)";
-              mysqlConnection.query(insertQuery, [BookID, name, genre, quantity, Price, SupplierID], (err) => {
-                  if (err) {
-                      console.error("Error inserting book into Books table:", err.message);
-                      return res.status(500).send("Error inserting Book into Books Table");
-                  }
-                  console.log("New Book inserted successfully.");
-                  insertIntoPurchasedStock();
-              });
-          } else {
-              // Book already exists, update quantity
-              const newQuantity = bookDetail[0].Quantity + quantity;
-              const updateQuery = "UPDATE Books SET Quantity = ? WHERE Book_Name = ?";
-              mysqlConnection.query(updateQuery, [newQuantity, name], (err) => {
-                  if (err) {
-                      console.error("Error updating book quantity in Books table:", err.message);
-                      return res.status(500).send("Error updating Book Quantity");
-                  }
-                  console.log("Book quantity updated successfully.");
-                  insertIntoPurchasedStock();
-              });
-          }
-      });
-
-      // Step 3: Insert order into Purchased_Stock table
-      function insertIntoPurchasedStock() {
-          const AddOrder = "INSERT INTO Purchased_Stock (BookID, Book_Name, Quantity, TotalAmount, SupplierID) VALUES (?, ?, ?, ?, ?)";
-          mysqlConnection.query(AddOrder, [BookID, name, quantity, totalAmount, SupplierID], (err) => {
-              if (err) {
-                  console.error("Error inserting order into Purchased_Stock:", err.message);
-                  return res.status(500).send("Error inserting Order into Purchased_Stock Table");
-              }
-              console.log("Order added to Purchased_Stock successfully.");
-              return res.redirect("/purchaseBook");
-          });
-      }
-  });
+        //inserting this order into Purchase_Stocks Table
+        const AddOrder = "INSERT INTO Purchased_Stock(BookID,Book_Name,Quantity,TotalAmount,SupplierID) VALUES(?, ?, ?, ?, ?)";
+        mysqlConnection.query(AddOrder,[BookID,name,quantity,totalAmount,SupplierID],(err) => {
+            if(err){
+                console.log("Error Adding Order ",err);
+                return res.status(500).send('Error Inserting Book Details To Books Table');
+            }
+        });
+        return res.redirect('/purchaseBook');
+    });
+    //Step3-> if not found, alert that book not in stock
 });
+
+//Add bill - Owner
+
 
 
 
 
 // ---------------Admin_Handling---------------
-
-app.get('/adminDashboard',(req,res) => {
-    res.render('adminDashboard.ejs');
+app.get('/adminDashboard', checkAuthenticatedAdmin, (req, res) => {
+  res.render('adminDashboard.ejs');
 });
 
 
-app.get('/addSupplierAdmin',(req,res)=>{
+app.post('/loginAdmin', checkNotAuthenticated, (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.redirect('/login'); // If no user found, redirect to login
+
+    // Check if the logged-in user is an admin
+    if (user.email === process.env.admin_login_id) {
+      req.logIn(user, (err) => {
+        if (err) return next(err);
+        return res.redirect('/adminDashboard'); // Redirect admin to adminDashboard
+      });
+    } else {
+      return res.redirect('/'); // Redirect others to home
+    }
+  })(req, res, next);
+});
+
+
+
+
+
+
+app.get('/addSupplierAdmin',checkAuthenticatedAdmin,(req,res)=>{
   const query="SELECT * FROM Supplier";
   mysqlConnection.query(query,(err,table)=>{
     if(err){
@@ -289,7 +278,7 @@ app.get('/addSupplierAdmin',(req,res)=>{
 
 });
 
-app.post('/addSupplierAdmin',checkAuthenticated,(req,res) => {
+app.post('/addSupplierAdmin',(req,res) => {
   const {name,city,number} = req.body;
   console.log(name, city,number);
   const query = "INSERT INTO Supplier (Supplier_Name,Contact_No,City) VALUES(?,?,?)";
@@ -304,7 +293,9 @@ app.post('/addSupplierAdmin',checkAuthenticated,(req,res) => {
 })
 
 
-app.get('/addSupplierBook',(req,res) => {
+
+
+app.get('/addSupplierBook',checkAuthenticatedAdmin,(req,res) => {
   const query = "SELECT * FROM SupplierBooks";
   const supplier = "SELECT Supplier_Name FROM Supplier";
   mysqlConnection.query(query,(err,result) => {
