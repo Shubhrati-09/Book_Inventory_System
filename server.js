@@ -354,24 +354,63 @@ app.post("/place-order", (req, res) => {
 });
 //-----------------------------------------------------------------------------------
 
-app.get('/salesreport',(req,res) => {
-  const query = "SELECT * FROM Retail_Orders";
-  mysqlConnection.query(query,(err,result) => {
-    if(err){
-      console.log("ERROR FETCHING RETAIL_ORDERS FOR SALES REPORT");
-      res.status(500).send("ERROR FETCHING RETAIL_ORDERS FOR SALES REPORT");
-    }
-    const totalBooks = result.reduce((sum, row) => sum + (row.TotalBooks || 0), 0);
-    const totalAmount = result.reduce((sum, row) => sum + (row.TotalAmount || 0), 0);
+// app.get('/salesreport',(req,res) => {
+//   const query = "SELECT * FROM Retail_Orders";
+//   mysqlConnection.query(query,(err,result) => {
+//     if(err){
+//       console.log("ERROR FETCHING RETAIL_ORDERS FOR SALES REPORT");
+//       res.status(500).send("ERROR FETCHING RETAIL_ORDERS FOR SALES REPORT");
+//     }
+//     const totalBooks = result.reduce((sum, row) => sum + (row.TotalBooks || 0), 0);
+//     const totalAmount = result.reduce((sum, row) => sum + (row.TotalAmount || 0), 0);
 
-    res.render('salesreport.ejs', {
-      table: result,
-      totalBooks: totalBooks,
-      totalAmount: totalAmount
+//     res.render('salesreport.ejs', {
+//       table: result,
+//       totalBooks: totalBooks,
+//       totalAmount: totalAmount
+//     });
+//   });
+// });
+
+
+app.get('/salesreport', (req, res) => {
+  const query = `
+    SELECT DATE(Order_datetime) AS order_date, SUM(TotalAmount) AS total_amount
+    FROM Retail_Orders
+    GROUP BY DATE(Order_datetime)
+    ORDER BY order_date;
+  `;
+
+  mysqlConnection.query(query, (err, result) => {
+    if (err) {
+      console.log("ERROR FETCHING SALES DATA");
+      return res.status(500).send("ERROR FETCHING SALES DATA");
+    }
+
+    const labels = result.map(row => row.order_date);
+    const data = result.map(row => row.total_amount);
+
+    // Still fetch the full table for tabular display
+    const allOrdersQuery = "SELECT * FROM Retail_Orders";
+    mysqlConnection.query(allOrdersQuery, (err2, allOrders) => {
+      if (err2) {
+        console.log("ERROR FETCHING FULL TABLE");
+        return res.status(500).send("ERROR FETCHING FULL TABLE");
+      }
+
+      const totalBooks = allOrders.reduce((sum, row) => sum + (row.TotalBooks || 0), 0);
+      const totalAmount = allOrders.reduce((sum, row) => sum + (row.TotalAmount || 0), 0);
+
+      res.render('salesreport.ejs', {
+        chartLabels: JSON.stringify(labels),
+        chartData: JSON.stringify(data),
+        table: allOrders,
+        totalBooks,
+        totalAmount
+      });
     });
   });
 });
-
 
 
 // -------------------------Admin_Handling-------------------------
