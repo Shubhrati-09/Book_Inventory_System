@@ -18,9 +18,25 @@
     <!-- header -->
     <div class="d-flex justify-content-between py-4 px-2 " style="background-color: oklch(0.391 0.09 240.876);">
       <h1 style="color:#ffffff">MANAGE SUPPLIER Books</h1>
-      <form action="/logout?_method=DELETE" method="POST">
-        <center><button type="submit" class="btn logout" style="background-color: #ffffff;" ><p class="text-black">Log Out</p></button></center>
-      </form>
+      <div class="d-flex">
+        <a href="/addSupplierAdmin">
+            <center>
+              <button type="button" class="btn mx-2" style="background-color: #ffffff;">
+                <p class="text-black">Add Supplier</p>
+              </button>
+            </center>
+          </a>
+        <a href="/inventory">
+          <center>
+            <button type="button" class="btn mx-2" style="background-color: #ffffff;">
+              <p class="text-black">Dashboard</p>
+            </button>
+          </center>
+        </a>
+        <form action="/logout?_method=DELETE" method="POST">
+          <center><button type="submit" class="btn logout mx-2" style="background-color: #ffffff;" ><p class="text-black">Log Out</p></button></center>
+        </form>
+      </div>
     </div>
     <!-- Table for Supplier -->
      <div class="container mt-3 purchase">

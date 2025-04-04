@@ -19,8 +19,8 @@ CREATE TABLE `Books` (
     `Quantity` BIGINT NOT NULL,
     `Price` BIGINT NOT NULL,
     `SupplierID` VARCHAR (25) NOT NULL
-    -- FOREIGN KEY (`SupplierID`) REFERENCES Supplier(`SupplierID`) ON DELETE CASCADE
 );
+    -- FOREIGN KEY (`SupplierID`) REFERENCES Supplier(`SupplierID`) ON DELETE CASCADE
 
 CREATE TABLE Purchased_Stock (
     `OrderID` VARCHAR(25) PRIMARY KEY,
@@ -35,6 +35,7 @@ CREATE TABLE Retail_Orders (
     `OrderID` VARCHAR(25) PRIMARY KEY,
     `Order_datetime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `Customer_name` VARCHAR(255),
+    `TotalBooks` BIGINT,
     `TotalAmount` BIGINT
 );
 
@@ -109,27 +110,27 @@ END $$
 DELIMITER ;
 
 -- Trigger for generating OrderID if not provided
-DELIMITER $$
+-- DELIMITER $$
 
-CREATE TRIGGER before_insert_retail_orders
-BEFORE INSERT ON Retail_Orders
-FOR EACH ROW
-BEGIN
-    DECLARE unique_supplier_id VARCHAR(25);
+-- CREATE TRIGGER before_insert_retail_orders
+-- BEFORE INSERT ON Retail_Orders
+-- FOR EACH ROW
+-- BEGIN
+--     DECLARE unique_supplier_id VARCHAR(25);
 
-    -- Generate a random SupplierID
-    SET unique_supplier_id = CONCAT('ROI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
+--     -- Generate a random SupplierID
+--     SET unique_supplier_id = CONCAT('ROI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
 
-    -- Check if the generated SupplierID already exists
-    WHILE EXISTS (SELECT 1 FROM Retail_Orders WHERE OrderID = unique_supplier_id) DO
-        -- Generate a new SupplierID if it already exists
-        SET unique_supplier_id = CONCAT('ROI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
-    END WHILE;
+--     -- Check if the generated SupplierID already exists
+--     WHILE EXISTS (SELECT 1 FROM Retail_Orders WHERE OrderID = unique_supplier_id) DO
+--         -- Generate a new SupplierID if it already exists
+--         SET unique_supplier_id = CONCAT('ROI', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
+--     END WHILE;
 
-    SET NEW.OrderID = unique_supplier_id;
-END $$
+--     SET NEW.OrderID = unique_supplier_id;
+-- END $$
 
-DELIMITER ;
+-- DELIMITER ;
 
 -- Trigger for generating OrderID if not provided
 DELIMITER $$

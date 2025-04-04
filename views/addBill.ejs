@@ -11,18 +11,141 @@
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
   <title>Add Bill</title>
+  <style>
+    .form-container {
+        margin:10rem;
+        margin-left: 20rem;
+        width: 100%;
+        max-width: 900px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .book-entry {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: #f1f1f1;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    .book-entry select, .book-entry input {
+        flex: 1;
+    }
+    .btn-remove {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+
 </head>
 <body>
  <!-- Page content holder -->
   <div class="page-content" id="content" style="background: #87CEEB">
     <!-- header -->
     <div class="d-flex justify-content-between py-4 px-2 " style="background-color: oklch(0.391 0.09 240.876);">
-      <h1 style="color:#ffffff">DASHBOARD</h1>
-      <form action="/logout?_method=DELETE" method="POST">
-        <center><button type="submit" class="btn logout" style="background-color: #ffffff;" ><p class="text-black">Log Out</p></button></center>
-      </form>
+      <h1 style="color:#ffffff">ADD BILL</h1>
+      <div class="d-flex">
+        <a href="/inventory">
+          <center>
+            <button type="button" class="btn mx-2" style="background-color: #ffffff;">
+              <p class="text-black">Inventory</p>
+            </button>
+          </center>
+        </a>
+        <a href="/">
+          <center>
+            <button type="button" class="btn mx-2" style="background-color: #ffffff;">
+              <p class="text-black">Dashboard</p>
+            </button>
+          </center>
+        </a>
+        <form action="/logout?_method=DELETE" method="POST">
+          <center><button type="submit" class="btn logout mx-2" style="background-color: #ffffff;" ><p class="text-black">Log Out</p></button></center>
+        </form>
+      </div>
+
     </div>
 
+    <div class="form-container">
+        <h3 class="text-center mb-4">Place Your Order</h3>
+        <form action="/place-order" method="POST">
+            <div class="mb-3">
+                <label class="form-label">Customer Name:</label>
+                <input type="text" name="customer_name" class="form-control" required>
+            </div>
+    
+            <div id="booksContainer">
+                <div class="book-entry">
+                    <select name="bookID[]" class="form-select bookName" onchange="updateQuantityDropdown(this)" required>
+                        <option value="">Select a book</option>
+                        <% books.forEach(book => { %>
+                            <option value="<%= book.BookID %>" data-quantity="<%= book.Quantity %>" data-price="<%= book.Price %>">
+                                <%= book.Book_Name %>
+                            </option>
+                        <% }) %>
+                    </select>
+    
+                    <select name="quantity[]" class="form-select quantity" required>
+                        <option value="">Select quantity</option>
+                    </select>
+    
+                    <input type="text" name="price[]" class="form-control price" readonly>
+    
+                    <button type="button" class="btn btn-danger btn-sm btn-remove" onclick="removeBook(this)">Remove</button>
+                </div>
+            </div>
+    
+            <button type="button" class="btn btn-primary mt-3 w-100" onclick="addBook()">Add Another Book</button>
+            <button type="submit" class="btn btn-success w-100 mt-3">Place Order</button>
+        </form>
+    </div>
+    <script>
+        function updateQuantityDropdown(select) {
+            let bookEntry = select.closest('.book-entry');
+            let quantityDropdown = bookEntry.querySelector('.quantity');
+            let priceInput = bookEntry.querySelector('.price');
+            let selectedOption = select.options[select.selectedIndex];
+    
+            quantityDropdown.innerHTML = '<option value="">Select quantity</option>';
+            let maxQuantity = selectedOption.dataset.quantity;
+            let price = selectedOption.dataset.price;
+    
+            for (let i = 1; i <= maxQuantity; i++) {
+                let option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                quantityDropdown.appendChild(option);
+            }
+            priceInput.value = price || "";
+        }
+    
+        function addBook() {
+            let firstBookEntry = document.querySelector('.book-entry'); // Get the first entry
+            let newBookEntry = firstBookEntry.cloneNode(true); // Clone it
+    
+            // Reset values for the new cloned entry
+            newBookEntry.querySelector('.bookName').selectedIndex = 0;
+            newBookEntry.querySelector('.quantity').innerHTML = '<option value="">Select quantity</option>';
+            newBookEntry.querySelector('.price').value = "";
+    
+            // Append the new book entry to the container
+            document.getElementById('booksContainer').appendChild(newBookEntry);
+        }
+    
+        function removeBook(button) {
+            let booksContainer = document.getElementById('booksContainer');
+            if (booksContainer.children.length > 1) {
+                button.closest('.book-entry').remove();
+            }
+        }
+    </script>
     
   
 </body>
