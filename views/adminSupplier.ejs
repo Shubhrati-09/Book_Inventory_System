@@ -73,6 +73,7 @@
                         <th>Supplier Name</th>
                         <th>City</th>
                         <th>Contact</th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -82,6 +83,12 @@
                           <td><%= s.Supplier_Name %></td>
                           <td><%= s.City %></td>
                           <td><%= s.Contact_No %></td>
+                          <td>
+                            <form action="/deleteSupplier/<%= s.SupplierID %>?_method=DELETE" method="POST" onsubmit="return confirm('Are you sure you want to delete this supplier?');">
+                              <button class="btn btn-danger">Remove</button>
+                            </form>
+                          </td>
+                          
                         </tr>
                       <% }); %>
                     </tbody>
@@ -95,3 +102,4 @@
 </html>
 
 
+frontend ejs

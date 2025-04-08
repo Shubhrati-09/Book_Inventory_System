@@ -128,11 +128,28 @@ app.get('/login', [checkNotAuthenticated, checkNotAuthenticatedAdmin], (req, res
   res.render('login.ejs');
 });
 
-app.post('/login', [checkNotAuthenticated, checkNotAuthenticatedAdmin], passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-  }))
+// app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+//     successRedirect: '/',
+//     failureRedirect: '/login',
+//     failureFlash: true
+//   }));
+
+  app.post('/login', checkNotAuthenticated, (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+      if (err) return next(err);
+      if (!user) return res.redirect('/login'); // If no user found, redirect to login
+  
+      // Check if the logged-in user is an admin
+      if (user.email === process.env.login_id) {
+        req.logIn(user, (err) => {
+          if (err) return next(err);
+          return res.redirect('/'); // Redirect owner to onwerDashboard
+        });
+      } else {
+        return res.redirect('/login'); // Redirect others to home
+      }
+    })(req, res, next);
+  });
 //------------------------------------------------------------------------
 
 
@@ -419,7 +436,7 @@ app.get('/adminDashboard', checkAuthenticatedAdmin, (req, res) => {
 });
 
 
-app.post('/loginAdmin', checkNotAuthenticated, (req, res, next) => {
+app.post('/loginAdmin', checkNotAuthenticatedAdmin, (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
     if (!user) return res.redirect('/login'); // If no user found, redirect to login
@@ -431,7 +448,7 @@ app.post('/loginAdmin', checkNotAuthenticated, (req, res, next) => {
         return res.redirect('/adminDashboard'); // Redirect admin to adminDashboard
       });
     } else {
-      return res.redirect('/'); // Redirect others to home
+      return res.redirect('/login'); // Redirect others to home
     }
   })(req, res, next);
 });
@@ -533,3 +550,19 @@ app.post('/addSupplierBook',(req,res) => {
   });
 });
 //---------------------------------------------------------------------------
+
+//----------------------------Delete  SUPPLIER Route---------------------------
+app.delete('/deleteSupplier/:id',(req,res)=>{
+  const supplierid = req.params.id;
+  const query = 'Delete from Supplier where SupplierID = ? ';
+  mysqlConnection.query(query,[supplierid],(err)=>{
+    if(err){
+      console.log("cannot delete the supplier",err.message);
+      return res.status(500).send("cannot delete the supplier");
+
+    }
+    console.log('deletion completed');
+    res.redirect('/addSupplierAdmin')
+  });
+})
+//-----------------------------------------------------------------------------

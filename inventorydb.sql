@@ -2,14 +2,25 @@ DROP TABLE IF EXISTS `Purchased_Stock`;
 DROP TABLE IF EXISTS `Transactions`;
 DROP TABLE IF EXISTS `Retail_Orders`;
 DROP TABLE IF EXISTS `Books`;
-DROP TABLE IF EXISTS `Supplier`;
 DROP TABLE IF EXISTS `SupplierBooks`;
+DROP TABLE IF EXISTS `Supplier`;
 
 CREATE TABLE `Supplier`(
     `SupplierID` VARCHAR(25) PRIMARY KEY,
     `Supplier_Name` VARCHAR (100) NOT NULL,
-    `Contact_No` VARCHAR(15) NOT NULL,
+    `Contact_No` CHAR(10) NOT NULL,
     `City` VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE SupplierBooks (
+    `SupplierID` VARCHAR(25),
+    `Supplier_Name` VARCHAR (100) NOT NULL,
+    `BookID` VARCHAR (25) NOT NULL,
+    `Book_Name` VARCHAR (100) NOT NULL,
+    `Book_Genre` VARCHAR (50) NOT NULL,
+    `Price` BIGINT,
+    PRIMARY KEY (`BookID`, `SupplierID`),
+    FOREIGN KEY (`SupplierID`) REFERENCES Supplier(`SupplierID`) ON DELETE CASCADE
 );
 
 CREATE TABLE `Books` (
@@ -39,7 +50,6 @@ CREATE TABLE Retail_Orders (
     `TotalAmount` BIGINT
 );
 
-
 CREATE TABLE Transactions (
     -- `Transaction_id` INT NOT NULL AUTO_INCREMENT,
     `OrderID` VARCHAR(25),
@@ -47,19 +57,8 @@ CREATE TABLE Transactions (
     `Quantity` INT NOT NULL,
     `Price` BIGINT NOT NULL,
     PRIMARY KEY (`BookID`, `OrderID`),
-    FOREIGN KEY (`OrderID`) REFERENCES Retail_Orders(`OrderID`) ON DELETE CASCADE,
-    FOREIGN KEY (`BookID`) REFERENCES Books(`BookID`) ON DELETE CASCADE
-);
-
-
-CREATE TABLE SupplierBooks (
-    `SupplierID` VARCHAR(25),
-    `Supplier_Name` VARCHAR (100) NOT NULL,
-    `BookID` VARCHAR (25) NOT NULL,
-    `Book_Name` VARCHAR (100) NOT NULL,
-    `Book_Genre` VARCHAR (50) NOT NULL,
-    `Price` BIGINT,
-    PRIMARY KEY (`BookID`, `SupplierID`)
+    FOREIGN KEY (`OrderID`) REFERENCES Retail_Orders(`OrderID`) ON DELETE CASCADE
+    -- FOREIGN KEY (`BookID`) REFERENCES Books(`BookID`)
 );
 
 -- Create a trigger to generate SupplierID automatically if not provided
@@ -74,7 +73,7 @@ BEGIN
     -- Generate a random SupplierID
     SET unique_supplier_id = CONCAT('SUP', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
 
-    -- Check if the generated SupplierID already exists
+    --  Check if the generated SupplierID already exists
     WHILE EXISTS (SELECT 1 FROM Supplier WHERE SupplierID = unique_supplier_id) DO
         -- Generate a new SupplierID if it already exists
         SET unique_supplier_id = CONCAT('SUP', LPAD(FLOOR(RAND() * 1000000000), 9, '0'));
@@ -163,8 +162,9 @@ INSERT INTO `Supplier` (`Supplier_Name`,`Contact_No`,`City`) VALUES
     ('Novel Network Suppliers','9332101234','Jammu');
 
 
-INSERT INTO `SupplierBooks`(`SupplierID`,`Supplier_Name`,`Book_Name`,`Book_Genre`,`Price`) VALUES
-    ('SUP113600282','Novel Network Suppliers','Rich Dad Poor Dad','Finance',500),
-    ('SUP194221958','PageTurner Distributors.','Alchemist','Dream',300),
-    ('SUP232752216','Jayesh Enterprises','Pretty Girl','Dream',1000)
-    ;
+-- INSERT INTO `SupplierBooks`(`SupplierID`,`Supplier_Name`,`Book_Name`,`Book_Genre`,`Price`) VALUES
+--     ('SUP113600282','Novel Network Suppliers','Rich Dad Poor Dad','Finance',500),
+--     ('SUP194221958','PageTurner Distributors.','Alchemist','Dream',300),
+--     ('SUP232752216','Jayesh Enterprises','Pretty Girl','Dream',1000)
+--     ;
+
