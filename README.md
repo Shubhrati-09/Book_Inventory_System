@@ -60,6 +60,41 @@ This project was created to:
 ## 🧪 How to Run the Project
 
 ###  Clone the Repository
+
 ```bash
 git clone https://github.com/Shubhrati-09/Book_Inventory_System
 cd book-inventory-system
+```
+
+###  Install Dependencies
+
+```bash
+npm install
+```
+
+### Set up the MySQL Database
+
+  1. Open MySQL and create a database
+
+```sql
+CREATE DATABASE bookHousedb;
+```
+
+  2. Import the schema from the provided SQL file
+
+```bash
+mysql -u root -p bookHousedb < inventorydb.sql
+```
+  
+  3. A .env file is already provided in the project.
+      Update the file with your local MySQL credentials
+```bash
+DB_USER=your_mysql_user
+DB_PASSWORD=your_mysql_password
+```
+### Run the Server
+```bash
+npm start
+```
+
+#### You are all set!
