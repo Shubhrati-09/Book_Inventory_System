@@ -86,11 +86,16 @@ CREATE DATABASE bookHousedb;
 mysql -u root -p bookHousedb < inventorydb.sql
 ```
   
-  3. A .env file is already provided in the project.
-      Update the file with your local MySQL credentials
+  3. Create a .env file and update the file with your local MySQL credentials
 ```bash
-DB_USER=your_mysql_user
-DB_PASSWORD=your_mysql_password
+SESSION_SECRET=secret
+db_name=bookHousedb
+db_user_name=root
+db_password={your_mysql_password}
+login_id=owner@gmail.com
+login_password=123
+admin_login_id=admin@gmail.com
+admin_login_password=admin123
 ```
 ### Run the Server
 ```bash
